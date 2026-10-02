@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title + ' | STUDIO Fashion' : 'STUDIO Fashion' %></title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/">STUDIO<span>.</span></a>
+    <nav class="main-nav">
+      <a href="/">Trang chủ</a><a href="/shop">Cửa hàng</a><a href="/cart">Giỏ hàng <span class="cart-count"><%= cartCount %></span></a>
+      <% if (currentUser) { %>
+        <% if (currentUser.role === 'admin') { %><a href="/admin">Quản trị</a><% } else if (currentUser.role === 'staff') { %><a href="/staff">Nhân viên</a><% } else { %><a href="/account">Tài khoản</a><% } %>
+        <form action="/logout" method="post" class="inline"><button class="link-button" type="submit">Đăng xuất</button></form>
+      <% } else { %><a href="/login">Đăng nhập</a><% } %>
+    </nav>
+  </div>
+</header>
+<main class="container page">
+  <% if (notice) { %><div class="alert <%= notice.type %>"><%= notice.message %></div><% } %>

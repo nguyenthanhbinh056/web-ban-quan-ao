@@ -1,0 +1,6 @@
+<%- include('partials/header', {title}) %>
+<div class="page-title"><p class="eyebrow">STUDIO COLLECTION</p><h1>Cửa hàng</h1><p>Khám phá những món đồ dành riêng cho phong cách của bạn.</p></div>
+<form class="filters" action="/shop" method="get"><input name="q" value="<%= q %>" placeholder="Tìm tên sản phẩm..."><select name="category"><option value="">Tất cả danh mục</option><% categories.forEach(c=>{ %><option value="<%= c %>" <%= category===c?'selected':'' %>><%= c %></option><% }) %></select><button class="btn btn-dark">Tìm kiếm</button></form>
+<% if(!products.length){ %><div class="empty"><h2>Chưa tìm thấy sản phẩm</h2><p>Thử từ khóa hoặc danh mục khác nhé.</p></div><% } %>
+<div class="product-grid"><% products.forEach((p,i)=>{ %><a class="product-card" href="/product/<%= p.id %>"><div class="product-image tone-<%= i%4 %>"><% if(p.image){ %><img src="<%= p.image %>" alt="<%= p.name %>"><% }else{ %><span class="product-placeholder"><%= p.category.toUpperCase() %></span><% } %></div><div class="product-meta"><div><h3><%= p.name %></h3><p><%= p.category %></p></div><strong><%= money(p.price) %></strong></div></a><% }) %></div>
+<%- include('partials/footer') %>

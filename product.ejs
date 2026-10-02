@@ -1,0 +1,53 @@
+<%- include('partials/header', {title}) %>
+<div class="detail-layout">
+  <div class="detail-image tone-<%= product.id % 4 %>"><% if(product.image){ %><img src="<%= product.image %>" alt="<%= product.name %>"><% }else{ %><span class="product-placeholder"><%= product.category.toUpperCase() %></span><% } %></div>
+  <div class="detail-info">
+    <p class="eyebrow"><%= product.category %> / STUDIO ESSENTIALS</p><h1><%= product.name %></h1><div class="detail-price"><%= money(product.price) %></div>
+    <p class="muted"><%= product.description %></p>
+    <form action="/cart/add" method="post" class="stack-form" id="add-cart-form">
+      <input type="hidden" name="productId" value="<%= product.id %>">
+      <label for="size-select">Kích thước</label><select id="size-select" name="size" required></select>
+      <label for="color-select">Màu sắc</label><select id="color-select" name="color" required></select>
+      <p class="stock-note" id="stock-note" aria-live="polite"></p>
+      <label for="qty-input">Số lượng</label><input id="qty-input" type="number" name="qty" min="1" max="99" value="1" required>
+      <button class="btn btn-dark btn-wide" id="add-cart-button">Thêm vào giỏ hàng ↗</button>
+    </form>
+    <p class="small muted">Tồn kho theo từng size và màu được kiểm tra khi thêm vào giỏ và đặt hàng.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const variants = <%- JSON.stringify(product.variants.map(v => ({ size: v.size, color: v.color, stock: v.stock }))) %>;
+  const sizeSelect = document.getElementById('size-select');
+  const colorSelect = document.getElementById('color-select');
+  const qtyInput = document.getElementById('qty-input');
+  const stockNote = document.getElementById('stock-note');
+  const addButton = document.getElementById('add-cart-button');
+  function fillSizes(preferred) {
+    const colors = new Set(Array.from(colorSelect.options).map(o => o.value));
+    const sizes = [...new Set(variants.filter(v => v.stock > 0 && (!colors.size || colors.has(v.color))).map(v => v.size))];
+    sizeSelect.innerHTML = sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+    if (sizes.includes(preferred)) sizeSelect.value = preferred;
+  }
+  function fillColors(preferred) {
+    const size = sizeSelect.value;
+    const colors = [...new Set(variants.filter(v => v.size === size && v.stock > 0).map(v => v.color))];
+    colorSelect.innerHTML = colors.map(c => `<option value="${c}">${c}</option>`).join('');
+    if (colors.includes(preferred)) colorSelect.value = preferred;
+  }
+  function updateStock() {
+    const v = variants.find(x => x.size === sizeSelect.value && x.color === colorSelect.value);
+    const stock = v ? v.stock : 0;
+    stockNote.textContent = stock > 0 ? `Còn ${stock} sản phẩm trong kho` : 'Tạm hết hàng';
+    qtyInput.max = Math.max(1, stock);
+    if (Number(qtyInput.value) > stock) qtyInput.value = stock > 0 ? stock : 1;
+    addButton.disabled = stock < 1;
+    addButton.textContent = stock > 0 ? 'Thêm vào giỏ hàng ↗' : 'Tạm hết hàng';
+  }
+  fillSizes(); fillColors(); updateStock();
+  sizeSelect.addEventListener('change', () => { fillColors(); updateStock(); });
+  colorSelect.addEventListener('change', updateStock);
+  qtyInput.addEventListener('change', () => { const v = variants.find(x => x.size === sizeSelect.value && x.color === colorSelect.value); const max = v?.stock || 1; qtyInput.value = Math.min(max, Math.max(1, Number(qtyInput.value) || 1)); });
+})();
+</script>
+<%- include('partials/footer') %>
